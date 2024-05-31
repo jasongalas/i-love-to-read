@@ -24,7 +24,7 @@ type Auth {
 
 type Query {
     users: [User]
-    getUser(_id: ID!): User
+    getUser: User
     books(username: String): [Book]
     me: User
 }

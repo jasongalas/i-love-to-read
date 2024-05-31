@@ -3,8 +3,8 @@ const { signToken, AuthenticationError } = require('../utils/auth');
 
 const resolvers = {
     Query: {
-        getUser: async (parent, { _id }) => {
-            return User.find({ _id }).populate("Books");
+        getUser: async (parent, _,context) => {
+            return User.findById({ _id: context.user._id }).populate("savedBooks");
         }
     },
     Mutation: {

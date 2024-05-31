@@ -1,4 +1,3 @@
-// import { useState, useEffect } from 'react';
 import {
   Container,
   Card,
@@ -15,21 +14,23 @@ import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
   const { loading, error, data } = useQuery(GET_ME);
-  const [removeBookMutation] = useMutation(REMOVE_BOOK);
+
+  const [removeBook] = useMutation(REMOVE_BOOK);
+  const userData = data?.getUser || {};
 
   const handleDeleteBook = async (bookId) => {
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-    if (!token) {
-      return false;
-    }
-
     try {
-      const { data } = await removeBookMutation({
+      await removeBook({
         variables: { bookId },
+        update: (cache, { data: { removeBook } }) => {
+          const { user } = cache.readQuery({ query: GET_ME });
+          cache.writeQuery({
+            query: GET_ME,
+            data: { user: { ...user, savedBooks: removeBook.savedBooks } },
+          });
+        },
       });
-
-      // Remove book's id from localStorage
+      // upon success, remove book's id from localStorage
       removeBookId(bookId);
     } catch (err) {
       console.error(err);
@@ -38,8 +39,6 @@ const SavedBooks = () => {
 
   if (loading) return <h2>LOADING...</h2>;
   if (error) return <h2>Error: {error.message}</h2>;
-
-  const userData = data ? data.me : null;
 
 
   return (
@@ -51,12 +50,12 @@ const SavedBooks = () => {
       </div>
       <Container>
         <h2 className='pt-5'>
-          {userData.savedBooks.length
+          {userData.savedBooks?.length
             ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
         </h2>
         <Row>
-          {userData.savedBooks.map((book) => {
+          {userData.savedBooks?.map((book) => {
             return (
               <Col md="4">
                 <Card key={book.bookId} border='dark'>

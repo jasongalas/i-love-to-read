@@ -3,9 +3,6 @@ const { signToken, AuthenticationError } = require('../utils/auth');
 
 const resolvers = {
     Query: {
-        users: async () => {
-            return User.find().populate("Books");
-        },
         getUser: async (parent, { _id }) => {
             return User.find({ _id }).populate("Books");
         }

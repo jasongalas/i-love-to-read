@@ -30,16 +30,19 @@ const resolvers = {
       
             return { token, user };
           },
-        saveBook: async (parent, { bookInput }, context) => {
+        saveBook: async (parent, { bookInfo }, context) => {
+            console.log(context)
             if (!context.user) {
                 throw AuthenticationError
             }
+            
 
             const updatedUser = await User.findByIdAndUpdate(
-                context.user._id,
-                { $addToSet: { savedBooks: bookInput } },
+                { _id: context.user._id },
+                { $addToSet: { savedBooks: bookInfo } },
                 { new: true }
             ).populate("savedBooks");
+            
 
             return updatedUser;
         },
@@ -50,7 +53,7 @@ const resolvers = {
             }
 
             const updatedUser = await User.findByIdAndUpdate(
-                context.user._id,
+                { _id: context.user._id },
                 { $pull: { savedBooks: { bookId: bookId } } },
                 { new: true }
             ).populate("savedBooks");
